@@ -1,2 +1,2 @@
 # High-Dimensional Functional Modeling of Formula 1 Race Pace
-Statistics fot High Dimensional Data Project - 2025
+Statistics for High Dimensional Data Project - 2025
