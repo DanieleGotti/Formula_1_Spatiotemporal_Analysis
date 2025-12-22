@@ -47,25 +47,25 @@ $$ \kappa(s) = \frac{|x'(s)y''(s) - y'(s)x''(s)|}{(x'(s)^2 + y'(s)^2)^{3/2}} $$
 
 *   **Implementazione:** Calcolo tramite gradienti finiti (`np.gradient`) su coordinate spazializzate.
 *   **Utilità:** Funziona come "regressore invariante" nel modello FDA, spiegando la variabilità della velocità dovuta al layout della pista.
+Questa è un'ottima domanda, perché spesso in statistica usiamo numeri senza capire il loro senso fisico.
 
----
+La **Curvatura ($\kappa$)** ha un significato geometrico molto preciso: è l'inverso del Raggio di Curvatura ($R$).
 
-### 3.1.1 Interpretazione Fisica e Scala della Curvatura
-Per una corretta interpretazione dei coefficienti del modello di regressione, è fondamentale comprendere la scala fisica della variabile $\kappa(s)$, la cui unità di misura è $m^{-1}$ (metri inversi).
-La curvatura è geometricamente definita come il reciproco del raggio di curvatura osculatore $R(s)$:
-$$ R(s) \approx \frac{1}{\kappa(s)} $$
+$$ \kappa = \frac{1}{R} $$
 
-L'analisi della distribuzione dei valori nel dataset rivela tre domini cinematici distinti, essenziali per la segmentazione funzionale del circuito:
+Dove $R$ è il raggio del cerchio che approssima meglio la curva in quel punto.
 
-1.  **Regime Rettilineo ($\kappa \to 0$):**
-    *   *Valori:* $\kappa < 0.001$ (es. $2.0 \cdot 10^{-5}$).
-    *   *Interpretazione:* Corrisponde a raggi $R > 1000m$. In questi tratti, la dinamica laterale è trascurabile e la velocità è limitata solo dalla potenza del motore (Power-limited) e dalla resistenza aerodinamica (Drag-limited).
-2.  **Regime "High-Speed Cornering":**
-    *   *Valori:* $0.002 < \kappa < 0.01$.
-    *   *Interpretazione:* Curve veloci con raggi tra $100m$ e $500m$. Qui il carico aerodinamico gioca il ruolo principale nel mantenere l'aderenza.
-3.  **Regime "Mechanical Grip" (Tornanti):**
-    *   *Valori:* $\kappa > 0.04$.
-    *   *Interpretazione:* Curve lente (es. Curva 1 o 10 in Bahrain) con raggi stretti ($R < 25m$). In questi punti, la velocità crolla drasticamente non per scelta del pilota, ma per il limite fisico di aderenza meccanica degli pneumatici (Friction-limited).
+### 1. Come leggere i numeri (La Scala)
+
+L'unità di misura è $m^{-1}$ (metri alla meno uno). Ecco una "tabella di traduzione" per la F1:
+
+| Valore Curvatura ($\kappa$) | Raggio ($R = 1/\kappa$) | Interpretazione F1 | Esempio Reale |
+| :--- | :--- | :--- | :--- |
+| **0.00002** | 50.000 metri | **Rettilineo** | Main Straight (Bahrain) |
+| **0.002 - 0.005** | 200 - 500 metri | **Curvone Veloce** | Curva 12 (Bahrain), Parabolica (Monza) |
+| **0.01 - 0.02** | 50 - 100 metri | **Curva Media** | Curve 6-7 (Bahrain) |
+| **0.03 - 0.05** | 20 - 33 metri | **Curva Lenta / 90°** | Curva 1 (Bahrain) |
+| **> 0.08** | < 12 metri | **Tornantino (Hairpin)** | Loews (Monaco), Curva 10 (Bahrain) |
 
 **Implicazione per il Modello D-STEM:**
 L'introduzione di $\kappa(s)$ permette al modello di distinguere se una bassa velocità in un punto $s$ è dovuta a *degrado gomme* (residuo anomalo rispetto al $\kappa$ locale) o semplicemente alla *geometria della pista* (bassa velocità predetta da un alto $\kappa$). Senza questo regressore, il modello interpreterebbe erroneamente le curve lente come zone di scarsa performance del pilota.
