@@ -95,7 +95,9 @@ Seguendo l'approccio rigoroso dei *Time Series Case Studies* (cfr. Box-Jenkins m
 
 ### 4.1 Validazione della Stazionarietà e Baseline Model
 Prima di applicare D-STEM, stimeremo un modello di **Regressione Funzionale Lineare (Concurrent Model)**:
-$$ v_t(s) = \beta_0(s) + \beta_1(s) \cdot \text{TyreAge}_t + \beta_2(s) \cdot \text{Fuel}_t + \epsilon_t(s) $$
+$$
+v_t(s) = \beta_0(s) + \beta_1(s) \cdot \text{TyreAge}_t + \beta_2(s) \cdot \text{Fuel}_t + \epsilon_t(s)
+$$
 Analizzeremo i residui $\epsilon_t(s)$ tramite **ACF (Autocorrelation Function)** e test di **Ljung-Box**.
 *   **Ipotesi:** Ci aspettiamo che i residui **non** siano *White Noise*, ma mostrino autocorrelazione significativa ai lag 1-2 (memoria del sistema, evoluzione pista).
 *   **Conclusione attesa:** Il fallimento del test di indipendenza dei residui sarà la **giustificazione formale** per l'adozione del modello **D-STEM**, che introduce una struttura di dipendenza spaziale e temporale latente.
