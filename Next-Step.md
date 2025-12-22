@@ -18,12 +18,7 @@ Questa è la **Roadmap "Master Class"**.
     *   *Il tocco in più:* Colora le linee sfumando dal **Blu (Giro 1)** al **Rosso (Giro 57)**.
     *   *Risultato visivo:* Si vedrà il "fascio" di curve abbassarsi nelle staccate man mano che il rosso avanza (degrado).
 
-2.  **Scatterplot "Friction Circle Proxy"** (Fisica)
-    *   *Cosa fare:* Scatterplot con X = Curvatura ($\kappa$), Y = Velocità ($v$).
-    *   *Risultato visivo:* Vedrai una curva iperbolica perfetta ($v \propto 1/\sqrt{\kappa}$).
-    *   *Messaggio al Prof:* "Abbiamo verificato che la curvatura è il predittore dominante (fisica), giustificando il suo uso come regressore."
-
-3.  **La Mappa delle Correlazioni Spaziali** (Fighissimo)
+2.  **La Mappa delle Correlazioni Spaziali** (Fighissimo)
     *   *Cosa fare:* Disegna il tracciato $(x,y)$. Colora ogni pezzetto di pista in base alla correlazione tra *Velocità* e *TyreLife*.
     *   *Risultato visivo:* La pista sarà rossa nelle curve (dove la gomma conta tanto) e grigia nei rettilinei (dove conta il motore).
     *   *Messaggio al Prof:* "Sappiamo esattamente *dove* il degrado colpisce: trazione e percorrenza, non velocità di punta."
