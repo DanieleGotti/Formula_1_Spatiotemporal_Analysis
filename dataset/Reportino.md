@@ -59,6 +59,8 @@ Dove $R$ è il raggio del cerchio che approssima meglio la curva in quel punto.
 
 L'unità di misura è $m^{-1}$ (metri alla meno uno). Ecco una "tabella di traduzione" per la F1:
 
+DA RICORDARE-- > abbiamo poi aggiunto le dummy solo per i grafici, nel D-stem ha senso tenere il valore numerico
+
 | Valore Curvatura ($\kappa$) | Raggio ($R = 1/\kappa$) | Interpretazione F1 | Esempio Reale |
 | :--- | :--- | :--- | :--- |
 | **0.00002** | 50.000 metri | **Rettilineo** | Main Straight (Bahrain) |
