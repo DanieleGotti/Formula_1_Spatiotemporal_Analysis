@@ -48,6 +48,28 @@ $$ \kappa(s) = \frac{|x'(s)y''(s) - y'(s)x''(s)|}{(x'(s)^2 + y'(s)^2)^{3/2}} $$
 *   **Implementazione:** Calcolo tramite gradienti finiti (`np.gradient`) su coordinate spazializzate.
 *   **Utilità:** Funziona come "regressore invariante" nel modello FDA, spiegando la variabilità della velocità dovuta al layout della pista.
 
+---
+
+### 3.1.1 Interpretazione Fisica e Scala della Curvatura
+Per una corretta interpretazione dei coefficienti del modello di regressione, è fondamentale comprendere la scala fisica della variabile $\kappa(s)$, la cui unità di misura è $m^{-1}$ (metri inversi).
+La curvatura è geometricamente definita come il reciproco del raggio di curvatura osculatore $R(s)$:
+$$ R(s) \approx \frac{1}{\kappa(s)} $$
+
+L'analisi della distribuzione dei valori nel dataset rivela tre domini cinematici distinti, essenziali per la segmentazione funzionale del circuito:
+
+1.  **Regime Rettilineo ($\kappa \to 0$):**
+    *   *Valori:* $\kappa < 0.001$ (es. $2.0 \cdot 10^{-5}$).
+    *   *Interpretazione:* Corrisponde a raggi $R > 1000m$. In questi tratti, la dinamica laterale è trascurabile e la velocità è limitata solo dalla potenza del motore (Power-limited) e dalla resistenza aerodinamica (Drag-limited).
+2.  **Regime "High-Speed Cornering":**
+    *   *Valori:* $0.002 < \kappa < 0.01$.
+    *   *Interpretazione:* Curve veloci con raggi tra $100m$ e $500m$. Qui il carico aerodinamico gioca il ruolo principale nel mantenere l'aderenza.
+3.  **Regime "Mechanical Grip" (Tornanti):**
+    *   *Valori:* $\kappa > 0.04$.
+    *   *Interpretazione:* Curve lente (es. Curva 1 o 10 in Bahrain) con raggi stretti ($R < 25m$). In questi punti, la velocità crolla drasticamente non per scelta del pilota, ma per il limite fisico di aderenza meccanica degli pneumatici (Friction-limited).
+
+**Implicazione per il Modello D-STEM:**
+L'introduzione di $\kappa(s)$ permette al modello di distinguere se una bassa velocità in un punto $s$ è dovuta a *degrado gomme* (residuo anomalo rispetto al $\kappa$ locale) o semplicemente alla *geometria della pista* (bassa velocità predetta da un alto $\kappa$). Senza questo regressore, il modello interpreterebbe erroneamente le curve lente come zone di scarsa performance del pilota.
+
 ### 3.2 Aerodinamica Attiva (DRS) - Variabile Binaria
 L'attivazione del DRS (Drag Reduction System) riduce il coefficiente di resistenza ($C_d$), incrementando la velocità non per "bravura" del pilota ma per configurazione meccanica.
 *   **Scelta Architetturale:** Interpolazione **Nearest Neighbor**.
