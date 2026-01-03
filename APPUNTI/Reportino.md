@@ -109,3 +109,106 @@ Utilizzeremo le feature statiche (Team, Performance Qualifica) ridotte via PCA p
 
 ## 5. Conclusione
 L'architettura dati presentata risolve il problema dell'allineamento dimensionale tipico della telemetria F1. L'arricchimento del dataset con variabili fisiche derivate (Curvatura, Fuel, DRS) e la rigorosa pulizia degli outlier (SC) forniscono una base solida ("High Quality Data") che permette di applicare modelli FDA avanzati non come "scatole nere", ma come strumenti di inferenza causale su un sistema fisico complesso.
+
+
+
+EXTRA --------------------------------
+
+Questa è un'ottima strategia. Se usi questi prompt, stai essenzialmente chiedendo a me (o all'LLM che userai per il codice) di agire come un **Research Assistant esperto in Geostatistica**.
+
+Ecco la sequenza di **4 Prompt** da usare. Copiali e incollali uno alla volta. Sono scritti per generare codice **MATLAB** rigoroso e commenti che giustificano le scelte teoriche (perfetti per il report).
+
+---
+
+### Prompt 1: Creazione della Base Funzionale (Fisica-Informed)
+*Obiettivo: Generare i coefficienti B-Spline usando la curvatura per posizionare i nodi (Knots Placement).*
+
+**Copia e incolla questo:**
+> "Agisci come un esperto di Functional Data Analysis (FDA) e MATLAB. Sto lavorando su dati di telemetria F1 (velocità vs spazio). Devo trasformare i dati discreti in oggetti funzionali usando B-Splines, ma voglio seguire l'approccio di Fassò/Finazzi ottimizzando la posizione dei nodi.
+>
+> **Input:**
+> 1. `SpaceGrid`: vettore [0, 10, ..., L] metri.
+> 2. `SpeedData`: matrice (n_punti x n_giri).
+> 3. `Curvature`: vettore (n_punti) che indica la curvatura della pista.
+>
+> **Task:**
+> Scrivi uno script MATLAB che:
+> 1. Definisca i nodi (knots) delle B-Splines NON in modo equidistante, ma basandosi sui quantili della `Curvature` (più nodi dove la curvatura è alta/complessa, meno nei rettilinei).
+> 2. Utilizzi `spap2` o le funzioni del Curve Fitting Toolbox per fittare le spline cubiche su ogni giro.
+> 3. Estragga la matrice dei coefficienti `Y_coeff` (n_basi x n_giri).
+> 4. Generi un plot di confronto tra il dato grezzo di un giro e la ricostruzione funzionale per validare il fit.
+>
+> Commenta il codice spiegando perché i nodi non equidistanti migliorano la parsimonia del modello."
+
+---
+
+### Prompt 2: Implementazione del Core FHDGM (Algoritmo EM)
+*Obiettivo: Costruire il "motore" statistico. Dato che non esiste `run_fhdgm`, qui chiediamo di scrivere il loop di stima.*
+
+**Copia e incolla questo:**
+> "Ora passiamo alla modellazione stocastica secondo il framework FHDGM (Functional Hidden Dynamic Geostatistical Model).
+>
+> **Dati:** Ho la matrice `Y_coeff` (Coefficienti B-Spline) ottenuta dal passo precedente.
+> **Covariate:** Ho `TyreAge` (vettore) e `Fuel` (vettore).
+>
+> **Task:**
+> Scrivi un codice MATLAB robusto per implementare l'algoritmo **EM (Expectation-Maximization)** accoppiato a un **Kalman Smoother** per stimare il seguente modello State-Space:
+>
+> **Equazione Osservazione:** $Y_t = \beta_{tyre} \cdot TyreAge_t + \beta_{fuel} \cdot Fuel_t + Z \cdot \alpha_t + \epsilon_t$
+> **Equazione di Stato:** $\alpha_t = A \cdot \alpha_{t-1} + \eta_t$
+>
+> Il codice deve:
+> 1. Inizializzare i parametri ($\beta$, matrici di transizione, varianze).
+> 2. Eseguire il loop EM:
+>    - **E-Step:** Stima degli stati latenti $\alpha_t$ tramite Kalman Smoother (puoi usare funzioni custom o adattare `ssm` se possibile, ma preferisco un approccio esplicito).
+>    - **M-Step:** Aggiornamento dei regressori $\beta$ (tramite GLS) e delle varianze.
+> 3. Calcolare la Log-Likelihood per monitorare la convergenza.
+>
+> Fornisci il codice completo commentato per la stima dei parametri."
+
+---
+
+### Prompt 3: Risultati e Bande di Confidenza (Il "Graal" di Fassò)
+*Obiettivo: Ottenere i grafici con l'incertezza statistica.*
+
+**Copia e incolla questo:**
+> "Il modello ha girato e ho le stime dei parametri $\beta$ (che sono vettori di coefficienti sulla base B-Spline) e la loro matrice di covarianza stimata dall'algoritmo EM.
+>
+> **Task:**
+> Devo visualizzare i risultati per il report accademico. Scrivi uno script MATLAB per:
+> 1. **Ricostruzione Funzionale:** Moltiplicare i coefficienti stimati $\beta_{tyre}$ per le funzioni base B-Spline per ottenere la curva continua dell'effetto gomma lungo il circuito.
+> 2. **Calcolo Incertezza:** Calcolare l'errore standard della curva funzionale usando la formula $Var(f(s)) = \Phi(s) \cdot Cov(\beta) \cdot \Phi(s)'$.
+> 3. **Plotting:** Generare un grafico professionale con:
+>    - La curva media dell'effetto `TyreAge`.
+>    - Le **Bande di Confidenza al 95%** (area ombreggiata).
+>    - Un'asse orizzontale in metri.
+>
+> Questo grafico serve a dimostrare se il degrado è statisticamente diverso da zero in specifici tratti della pista (es. curve vs rettilinei)."
+
+---
+
+### Prompt 4: Diagnostica e Validazione (Per la Lode)
+*Obiettivo: Dimostrare che il modello è solido e non "fittato a caso".*
+
+**Copia e incolla questo:**
+> "Ultimo step: devo produrre la diagnostica dei residui per validare il modello FHDGM nel report finale.
+>
+> **Task:**
+> Scrivi uno script MATLAB che:
+> 1. Calcoli i residui funzionali: $Residui(s, t) = DatiReali(s, t) - DatiPredetti(s, t)$.
+> 2. Produca un **Heatmap Spazio-Temporale** dei residui (X=Spazio, Y=Giri, Colore=Errore).
+> 3. Calcoli e plotti l'**Autocorrelazione (ACF)** media dei residui nel tempo per verificare che siano "White Noise" (bianchi/indipendenti).
+> 4. Generi un **QQ-Plot** per verificare la normalità degli errori.
+>
+> Includi nei commenti come interpretare questi grafici: cosa devo cercare per dire al professore che 'il modello cattura adeguatamente la dinamica spazio-temporale'?"
+
+---
+
+### Come procedere:
+1.  Apri una nuova chat (o continua quella attuale con il tool di coding).
+2.  Incolla il **Prompt 1**. Prendi il codice, mettilo in MATLAB, fallo girare e correggi eventuali errori di path dei file.
+3.  Una volta che hai la matrice `Y_coeff`, incolla il **Prompt 2**. Questo sarà il pezzo più lungo.
+4.  Con i risultati in mano (`beta_stima`, `cov_beta`), vai col **Prompt 3** per i grafici belli.
+5.  Chiudi col **Prompt 4** per i grafici di controllo qualità.
+
+Se segui questa sequenza, avrai esattamente (e fisicamente nel codice) tutto ciò che hai promesso nel Report.
